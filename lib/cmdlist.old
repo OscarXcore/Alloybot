@@ -1,0 +1,88 @@
+/***************
+* DJ Stapleton *
+* cmdlist.js   *
+****************/
+let CORE, meta;
+
+module.exports = function(init) {
+    meta = {
+        name: `cmdlist`,
+        desc: `Lists all registered commands.`,
+        sub: {
+            here: {
+                name: `here`,
+                desc: `Posts the message in the current channel.`,
+                usage: `${init.parsedCmd.prefix}cmdlist here`,
+                disabled: false,
+                reason: null
+            },
+            dm: {
+                name: `dm`,
+                desc: `Posts the message in the users' direct messages.`,
+                usage: `${init.parsedCmd.prefix}cmdlist dm`,
+                disabled: false,
+                reason: null
+            }
+        },
+        usage: `\`${init.parsedCmd.prefix}cmdlist <dm|here>\``,
+        example:`\`${init.parsedCmd.prefix}cmdlist dm\``,
+        type: `General`,
+        disabled: false,
+        reason: null
+    }
+    CORE = init;
+    init.modules.commands.set(meta.name, main);
+    init.modules.meta.set(meta.name, meta);
+}
+
+function main(messageEvent) {
+    const discordJS = require('discord.js');
+    let embed = new discordJS.RichEmbed(CORE.richEmbed).setColor('RANDOM');
+
+    let lists = {
+        General: [],
+        Music: [],
+        Other: [],
+        Playlist: [],
+        Voice: []
+    }
+
+    CORE.meta.forEach(meta => {
+        switch (meta.type) {
+            case 'General':
+                lists.General.push(meta.name);
+                break;
+            case 'Music':
+                lists.Music.push(meta.name);
+                break;
+            case 'Other':
+                lists.Other.push(meta.name);
+                break;
+            case 'Playlist':
+                lists.Playlist.push(meta.name);
+                break;
+            case 'Voice':
+                lists.Voice.push(meta.name);
+                break;
+            default:
+                // Do Nothing
+        }
+    });
+
+    Object.keys(lists).forEach(key => {
+        if (lists[key].length != 0) embed.addField(key, lists[key].join(', '));
+        else embed.addField(key, 'Not Available.');
+    });
+
+    switch(CORE.parsedCmd.sub) {
+        case 'dm':
+            CORE.utils.messageDMChannel(messageEvent, embed);
+            break;
+        case 'here':
+            messageEvent.channel.send(embed);
+            break;
+        default:
+            messageEvent.channel.send(`Where should I send it? Put either \`dm\` or \`here\` after the \`${CORE.parsedCmd.prefix}cmdlist\``);
+    }
+}
+
