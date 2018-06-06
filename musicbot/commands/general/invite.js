@@ -21,7 +21,7 @@ module.exports = function() {
 
 function main(messageEvent) {
     if (messageEvent.channel.type == 'dm' && messageEvent.author.id == process.env.CREATOR_ID) {
-        discord.generateInvite(['ADMINISTRATOR']).then(invite => {
+        connections.get('discord').client.generateInvite(['ADMINISTRATOR']).then(invite => {
             messageEvent.channel.send(`${invite}`);
         })
     } else {

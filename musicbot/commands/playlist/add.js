@@ -2,11 +2,10 @@
 * DJ Stapleton *
 * add.js   *
 ****************/
-let meta;
 const mongoose = require('mongoose');
 
 module.exports = function() {
-    meta = {
+    let meta = {
         name: `add`,
         desc: `Finds the first video returned from using the search words or link and adds it to the end of the queue.`,
         sub: {},
@@ -34,6 +33,7 @@ const queue = mongoose.Schema({
 const queueModel = mongoose.model('queue', queue);
 
 function main(messageEvent) {
+    let ytapi = connections.get('ytapi');
     let queueItem = new queueModel({ 
         guild: messageEvent.guild.id,
         requestedBy: messageEvent.author.id

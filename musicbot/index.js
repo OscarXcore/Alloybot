@@ -44,18 +44,19 @@ loadModules(path.join(__dirname, 'commands'));
 /*************
  * Bot Stuff *
  *************/
+let discord = connections.get('discord');
 
-discord.on('message', function(message) {
+discord.client.on('message', function(message) {
 
 	// If the message was created by the bot, return.
-	if (message.author.id == discord.user.id) return;
+	if (message.author.id == discord.client.user.id) return;
 
 	if (message.content != 'invite'.prefixed() && message.channel.type == 'dm') return;
 	if (message.content == 'invite'.prefixed() && message.channel.type == 'dm') musicbot.commands.get('invite')(message);
 
 	// Apply some RichEmbed defaults to the core object.
 	if (message.guild) {
-		if (!embed.thumbnail || (embed.thumbnail != message.guild.iconURL)) embed.thumbnail = {
+		if (!discord.embed.thumbnail || (discord.embed.thumbnail != message.guild.iconURL)) discord.embed.thumbnail = {
 			url: message.guild.iconURL
 		};
 

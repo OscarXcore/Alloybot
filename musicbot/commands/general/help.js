@@ -30,6 +30,7 @@ module.exports = function() {
 
 function main(messageEvent) {
     let helpForCommand, commeta, finalEmbed;
+    let embed = connections.get('discord').embed;
 
     if (musicbot.parsed.arguments[1]) helpForCommand = {
         base: musicbot.parsed.arguments[0],

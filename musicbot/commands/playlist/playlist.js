@@ -2,10 +2,9 @@
 * DJ Stapleton *
 * playlist.js  *
 ****************/
-let meta;
 
 module.exports = function() {
-    meta = {
+    let meta = {
         name: `playlist`,
         desc: `Lists everything in the playlist for the current server.`,
         sub: {},

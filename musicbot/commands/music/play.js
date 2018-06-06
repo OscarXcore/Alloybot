@@ -2,10 +2,9 @@
 * DJ Stapleton *
 * play.js   *
 ****************/
-let meta;
 
 module.exports = function() {
-    meta = {
+    let meta = {
         name: `play`,
         desc: `Starts playing the first song in the queue. If there is a youtube link or search words after the command, it will play what it finds, before the queue.`,
         sub: {},

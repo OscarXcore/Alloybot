@@ -4,19 +4,17 @@ require('dotenv').config({
 require('./lib/prototypes.js');
 
 const simpleyoutubeapi = require('simple-youtube-api');
-global.ytapi = new simpleyoutubeapi(process.env['YOUTUBE_API_KEY']);
-
 const discordjs = require('discord.js');
-global.discord = new discordjs.Client();
-global.discord.login(process.env['DISCORD_TOKEN']);
-global.embed = new discordjs.RichEmbed();
+const mongoose = require('mongoose').connect(`mongodb://${process.env['DB_USER']}:${process.env['DB_PASS']}@${process.env['DB_HOST']}/${process.env['DB_NAME']}?authSource=${process.env['DB_NAME']}`);
 
-const mongoose = require('mongoose');
-mongoose.connect(`mongodb://${process.env['DB_USER']}:${process.env['DB_PASS']}@${process.env['DB_HOST']}/${process.env['DB_NAME']}?authSource=${process.env['DB_NAME']}`);
-global.mongoose = mongoose.connection;
+global.connections = new Map();
+connections.set('ytapi', new simpleyoutubeapi(process.env['YOUTUBE_API_KEY']));
+connections.set('discord', { client: new discordjs.Client(), embed: new discordjs.RichEmbed() });
+connections.set('database', mongoose.connection);
 
-const LOGGER = require('./lib/logger.js');
-global.logger = LOGGER;
+connections.get('discord').client.login(process.env['DISCORD_TOKEN']);
+
+global.logger = require('./lib/logger.js');
 
 global.utils = {
 	messageDMChannel: require('./lib/messageDMChannel.js')
@@ -36,31 +34,33 @@ require('./musicbot/index.js');
 /******************
  * Event Handling *
  ******************/
+let database = connections.get('database');
+let discord = connections.get('discord');
 
-mongoose.connection.on('error', error => {
+database.on('error', error => {
 	logger.mongoose(error);
 });
 
-mongoose.connection.once('open', () => {
+database.once('open', () => {
 	logger.mongoose(`Connected to database.`);
 });
 
-discord.on('ready', () => {
-	logger.discordjs(`Connected to ${discord.guilds.size} servers.`);
-	embed.setFooter(discord.user.username, discord.user.avatarURL);
-	embed.setColor('RANDOM');
+discord.client.on('ready', () => {
+	logger.discordjs(`Connected to ${discord.client.guilds.size} servers.`);
+	discord.embed.setFooter(discord.client.user.username, discord.client.user.avatarURL);
+	discord.embed.setColor('RANDOM');
 });
 
-discord.on('error', error => {
+discord.client.on('error', error => {
 	logger.discordjs(error);
 });
 
-discord.on('disconnect', error => {
+discord.client.on('disconnect', error => {
 	logger.discordjs(error);
 });
 
 if (process.env['DEBUG'] == true) {
-	discord.on('debug', debug => {
+	discord.client.on('debug', debug => {
 		logger.discordjs(debug);
 	});
 }
