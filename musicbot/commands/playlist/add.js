@@ -2,7 +2,6 @@
 * DJ Stapleton *
 * add.js   *
 ****************/
-const mongoose = require('mongoose');
 
 module.exports = function() {
     let meta = {
@@ -20,7 +19,7 @@ module.exports = function() {
     musicbot.meta.set(meta.name, meta);
 }
 
-const queue = mongoose.Schema({
+/*const queue = mongoose.Schema({
     guild: Number,
     requestedBy: Number,
     title: String,
@@ -30,7 +29,7 @@ const queue = mongoose.Schema({
     related: Array
 });
 
-const queueModel = mongoose.model('queue', queue);
+const queueModel = mongoose.model('queue', queue);*/
 
 function main(messageEvent) {
     let ytapi = connections.get('ytapi');
@@ -69,7 +68,7 @@ function getVideo(messageEvent, link) {
         }
 
         queueModel.create(item, (error, item) => {
-            if (error) logger.mongoose(`Failed to create document. ${error}`);
+            if (error) logger.error(`Failed to create document. ${error}`);
         });
     });
 }

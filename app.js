@@ -1,66 +1,67 @@
+global._connections = new Map();
+global._options = new Map();
+global._utils = {
+	messageDMChannel: require('./lib/messageDMChannel')
+}
+
 require('dotenv').config({
 	path: './private.env'
 });
-require('./lib/prototypes.js');
+require('./lib/prototypes');
+require('./lib/logger');
 
 const simpleyoutubeapi = require('simple-youtube-api');
 const discordjs = require('discord.js');
-const mongoose = require('mongoose').connect(`mongodb://${process.env['DB_USER']}:${process.env['DB_PASS']}@${process.env['DB_HOST']}/${process.env['DB_NAME']}?authSource=${process.env['DB_NAME']}`);
+const mongodb = require('mongodb').MongoClient
 
-global.connections = new Map();
-connections.set('ytapi', new simpleyoutubeapi(process.env['YOUTUBE_API_KEY']));
-connections.set('discord', { client: new discordjs.Client(), embed: new discordjs.RichEmbed() });
-connections.set('database', mongoose.connection);
+_connections.set('ytapi', new simpleyoutubeapi(process.env['YOUTUBE_API_KEY']));
+_connections.set('database', { promise: mongodb.connect(`mongodb://${process.env['DB_HOST']}`, { useNewUrlParser: true }) });
 
-connections.get('discord').client.login(process.env['DISCORD_TOKEN']);
-
-global.logger = require('./lib/logger.js');
-
-global.utils = {
-	messageDMChannel: require('./lib/messageDMChannel.js')
-}
+_connections.set('discord', { client: new discordjs.Client(), embed: new discordjs.RichEmbed() });
+_connections.get('discord').promise = _connections.get('discord').client.login(process.env['DISCORD_TOKEN']);
 
 /***********
  * Modules *
  ***********/
-
-/*const musicbot = require('child_process').fork('./musicbot/index.js')
-.on('message', message => { LOGGER.master(message); })
-.on('exit', (code, signal) => { LOGGER.master(`Musicbot exited. Code: ${code} | Signal: ${signal}`); })
-.on('error', error => { LOGGER.master(`Musicbot errored. ${error}`); })
-.on('disconnect', () => { LOGGER.master(`Musicbot disconnected.`); });*/
-require('./musicbot/index.js');
+require('./musicbot/index');
 
 /******************
  * Event Handling *
  ******************/
-let database = connections.get('database');
-let discord = connections.get('discord');
+let database = _connections.get('database').promise;
+let discord = _connections.get('discord');
 
-database.on('error', error => {
-	logger.mongoose(error);
+logger.start({ prefix: '0/1', message: 'DJ Stapleton:', suffix: 'Starting.'});
+
+database.catch(() => {
+	logger.error({ prefix: '0/1', message: 'Database:', suffix: 'Failed.' });
 });
 
-database.once('open', () => {
-	logger.mongoose(`Connected to database.`);
+database.then(client => {
+	_connections.get('database').client = client;
+	logger.success({ prefix: '1/1', message: 'Database:', suffix: 'Connected.' });
 });
 
-discord.client.on('ready', () => {
-	logger.discordjs(`Connected to ${discord.client.guilds.size} servers.`);
+discord.promise.then(() => {
+    logger.success({ prefix: '1/1', message: 'Discord:', suffix: 'Connected.' });
+    logger.info({ prefix: '1/1', message: 'Server Count:', suffix: discord.client.guilds.size.toString() });
 	discord.embed.setFooter(discord.client.user.username, discord.client.user.avatarURL);
 	discord.embed.setColor('RANDOM');
 });
 
-discord.client.on('error', error => {
-	logger.discordjs(error);
-});
-
-discord.client.on('disconnect', error => {
-	logger.discordjs(error);
+discord.promise.catch(() => {
+	logger.error({ prefix: '0/1', message: 'Discord:', suffix: 'Failed.' });
 });
 
 if (process.env['DEBUG'] == true) {
 	discord.client.on('debug', debug => {
-		logger.discordjs(debug);
+		logger.debug({ prefix: 'Discord', message: debug});
 	});
 }
+
+Promise.all([database, discord.promise])
+.then(() => {
+	logger.complete({ prefix: '1/1', message: 'DJ Stapleton:', suffix: 'Started.'});
+}).catch(error => {
+	logger.fatal({ prefix: '0/1', message: 'DJ Stapleton:', suffix: `${error} failed to start.`});
+});

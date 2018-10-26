@@ -34,7 +34,7 @@ function loadModules(dir) {
 			}
 		// If 'dir' is a file, load it. Also call an init function in the module on load.
 		} else {
-			require(dir)();
+			require(dir);
 		}
 	});
 }
@@ -44,7 +44,7 @@ loadModules(path.join(__dirname, 'commands'));
 /*************
  * Bot Stuff *
  *************/
-let discord = connections.get('discord');
+let discord = _connections.get('discord');
 
 discord.client.on('message', function(message) {
 
