@@ -3,48 +3,29 @@
 * cmdlist.js   *
 ****************/
 
-let list = {
-    General: [],
-    Music: [],
-    Other: [],
-    Playlist: [],
-    Voice: []
-};
-
 module.exports = function() {
-    let meta = {
+    let metadata = {
         name: `cmdlist`,
         desc: `Lists all registered commands.`,
-        sub: {
-            here: {
-                name: `here`,
-                desc: `Posts the message in the current channel.`,
-                usage: `cmdlist here`.prefixed().inlineCode(),
-                disabled: false,
-                reason: null
-            },
-            dm: {
-                name: `dm`,
-                desc: `Posts the message in the users' direct messages.`,
-                usage: `cmdlist dm`.prefixed().inlineCode(),
-                disabled: false,
-                reason: null
-            }
-        },
-        usage: `cmdlist <dm|here>`.prefixed().inlineCode(),
-        example: `cmdlist dm`.prefixed().inlineCode(),
+        usage: `cmdlist`.prefixed().inlineCode(),
+        example: `cmdlist`.prefixed().inlineCode(),
         type: `General`,
         disabled: false,
         reason: null
     }
 
-    musicbot.commands.set(meta.name, main);
-    musicbot.meta.set(meta.name, meta);
-
-    musicbot.meta.forEach(meta => {
-        list[meta.type].push(meta.name);
-    });
+    _musicbot.commands.set(metadata.name, main);
+    _musicbot.metadata.set(metadata.name, metadata);
+    _musicbot.groups[metadata.type].push(metadata.name);
 }
 
-function main(messageEvent) {
+function main(message) {
+    let embed = _connections.get('discord').embed();
+
+    Object.keys(_musicbot.groups).forEach(group => {
+        if (_musicbot.groups[group].length > 0) embed.addField(group, _musicbot.groups[group].join(', '))
+        else embed.addField(group, 'Empty');
+    });
+
+    message.channel.send(embed.setTimestamp());
 }

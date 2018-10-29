@@ -4,7 +4,7 @@
 ****************/
 
 module.exports = function() {
-    let meta = {
+    let metadata = {
         name: `play`,
         desc: `Starts playing the first song in the queue. If there is a youtube link or search words after the command, it will play what it finds, before the queue.`,
         sub: {},
@@ -15,8 +15,9 @@ module.exports = function() {
         reason: null
     }
 
-    musicbot.commands.set(meta.name, main);
-    musicbot.meta.set(meta.name, meta);
+    _musicbot.commands.set(metadata.name, main);
+    _musicbot.metadata.set(metadata.name, metadata);
+    _musicbot.groups[metadata.type].push(metadata.name);
 }
 
 function main(messageEvent) {

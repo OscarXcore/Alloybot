@@ -1,5 +1,6 @@
 global._connections = new Map();
 global._options = new Map();
+global._symbols = /(\W)/g;
 global._utils = {
 	messageDMChannel: require('./lib/messageDMChannel')
 }
@@ -17,13 +18,8 @@ const mongodb = require('mongodb').MongoClient
 _connections.set('ytapi', new simpleyoutubeapi(process.env['YOUTUBE_API_KEY']));
 _connections.set('database', { promise: mongodb.connect(`mongodb://${process.env['DB_HOST']}`, { useNewUrlParser: true }) });
 
-_connections.set('discord', { client: new discordjs.Client(), embed: new discordjs.RichEmbed() });
+_connections.set('discord', { client: new discordjs.Client() });
 _connections.get('discord').promise = _connections.get('discord').client.login(process.env['DISCORD_TOKEN']);
-
-/***********
- * Modules *
- ***********/
-require('./musicbot/index');
 
 /******************
  * Event Handling *
@@ -44,13 +40,24 @@ database.then(client => {
 
 discord.promise.then(() => {
     logger.success({ prefix: '1/1', message: 'Discord:', suffix: 'Connected.' });
-    logger.info({ prefix: '1/1', message: 'Server Count:', suffix: discord.client.guilds.size.toString() });
-	discord.embed.setFooter(discord.client.user.username, discord.client.user.avatarURL);
-	discord.embed.setColor('RANDOM');
+	logger.info({ prefix: '1/1', message: 'Server Count:', suffix: discord.client.guilds.size.toString() });
+	discord.embed = function() {
+		let embed = new discordjs.RichEmbed();
+		embed.setColor('RANDOM');
+		embed.setAuthor(discord.client.user.username, discord.client.user.avatarURL);
+		return embed;
+	}
 });
 
 discord.promise.catch(() => {
 	logger.error({ prefix: '0/1', message: 'Discord:', suffix: 'Failed.' });
+});
+
+Promise.all([database, discord.promise])
+.then(() => {
+	logger.complete({ prefix: '1/1', message: 'DJ Stapleton:', suffix: 'Started.'});
+}).catch(error => {
+	logger.fatal({ prefix: '0/1', message: 'DJ Stapleton:', suffix: `${error} failed to start.`});
 });
 
 if (process.env['DEBUG'] == true) {
@@ -59,9 +66,7 @@ if (process.env['DEBUG'] == true) {
 	});
 }
 
-Promise.all([database, discord.promise])
-.then(() => {
-	logger.complete({ prefix: '1/1', message: 'DJ Stapleton:', suffix: 'Started.'});
-}).catch(error => {
-	logger.fatal({ prefix: '0/1', message: 'DJ Stapleton:', suffix: `${error} failed to start.`});
-});
+/***********
+ * Modules *
+ ***********/
+require('./musicbot/index');

@@ -4,7 +4,7 @@
 ****************/
 
 module.exports = function() {
-    let meta = {
+    let metadata = {
         name: `add`,
         desc: `Finds the first video returned from using the search words or link and adds it to the end of the queue.`,
         sub: {},
@@ -15,8 +15,9 @@ module.exports = function() {
         reason: null
     }
 
-    musicbot.commands.set(meta.name, main);
-    musicbot.meta.set(meta.name, meta);
+    _musicbot.commands.set(metadata.name, main);
+    _musicbot.metadata.set(metadata.name, metadata);
+    _musicbot.groups[metadata.type].push(metadata.name);
 }
 
 /*const queue = mongoose.Schema({
@@ -38,8 +39,8 @@ function main(messageEvent) {
         requestedBy: messageEvent.author.id
     });
 
-    if (musicbot.parsed.subargs.length > 1) search(messageEvent, musicbot.parsed.subargs.join(' '));
-    else getVideo(messageEvent, musicbot.parsed.subargs);
+    if (_musicbot.parsed.subargs.length > 1) search(messageEvent, _musicbot.parsed.subargs.join(' '));
+    else getVideo(messageEvent, _musicbot.parsed.subargs);
 }
 
 function search(messageEvent, query) {

@@ -4,10 +4,9 @@
 *********************/
 
 module.exports = function() {
-    let meta = {
+    let metadata = {
         name: `invite`,
         desc: `Generates a link to join the bot to other discord servers.${String.newLine}${'Bot Creator Only'.italic()}`,
-        sub: {},
         usage: `${'DM Only'.underline()} ${'invite'.prefixed().inlineCode()}`,
         example: 'invite'.prefixed().inlineCode(),
         type: `General`,
@@ -15,8 +14,9 @@ module.exports = function() {
         reason: null //'For the bot creator only.' 
     }
 
-    musicbot.commands.set(meta.name, main);
-    musicbot.meta.set(meta.name, meta);
+    _musicbot.commands.set(metadata.name, main);
+    _musicbot.metadata.set(metadata.name, metadata);
+    _musicbot.groups[metadata.type].push(metadata.name);
 }
 
 function main(messageEvent) {

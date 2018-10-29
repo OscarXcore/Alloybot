@@ -4,7 +4,7 @@
 ****************/
 
 module.exports = function() {
-    let meta = {
+    let metadata = {
         name: `playlist`,
         desc: `Lists everything in the playlist for the current server.`,
         sub: {},
@@ -15,8 +15,9 @@ module.exports = function() {
         reason: null
     }
 
-    musicbot.commands.set(meta.name, main);
-    musicbot.meta.set(meta.name, meta);
+    _musicbot.commands.set(metadata.name, main);
+    _musicbot.metadata.set(metadata.name, metadata);
+    _musicbot.groups[metadata.type].push(metadata.name);
 }
 
 function main(messageEvent) {
