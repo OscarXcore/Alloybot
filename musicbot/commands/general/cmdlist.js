@@ -2,14 +2,15 @@
 * DJ Stapleton *
 * cmdlist.js   *
 ****************/
+const lang = _langfiles.get('musicbot');
 
 module.exports = function() {
     let metadata = {
-        name: `cmdlist`,
-        desc: `Lists all registered commands.`,
-        usage: `cmdlist`.prefixed().inlineCode(),
-        example: `cmdlist`.prefixed().inlineCode(),
-        type: `General`,
+        name: "cmdlist",
+        desc: lang.description.cmdlist,
+        usage: "cmdlist".prefixed().inlineCode(),
+        example: "cmdlist".prefixed().inlineCode(),
+        type: lang.type[0],
         disabled: false,
         reason: null
     }
@@ -20,11 +21,11 @@ module.exports = function() {
 }
 
 function main(message) {
-    let embed = _connections.get('discord').embed();
+    let embed = _connections.get("discord").embed();
 
     Object.keys(_musicbot.groups).forEach(group => {
-        if (_musicbot.groups[group].length > 0) embed.addField(group, _musicbot.groups[group].join(', '))
-        else embed.addField(group, 'Empty');
+        if (_musicbot.groups[group].length > 0) embed.addField(group, _musicbot.groups[group].join(", "))
+        else embed.addField(group, lang.label.empty);
     });
 
     message.channel.send(embed.setTimestamp());

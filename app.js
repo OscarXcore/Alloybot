@@ -1,14 +1,13 @@
 global._connections = new Map();
 global._options = new Map();
 global._symbols = /(\W)/g;
-global._utils = {
-	messageDMChannel: require('./lib/messageDMChannel')
-}
+global._langfiles = new Map();
+global._loader = require('./lib/loader');
 
 require('dotenv').config({
 	path: './private.env'
 });
-require('./lib/prototypes');
+require('./lib/format');
 require('./lib/logger');
 
 const simpleyoutubeapi = require('simple-youtube-api');
@@ -16,7 +15,7 @@ const discordjs = require('discord.js');
 const mongodb = require('mongodb').MongoClient
 
 _connections.set('ytapi', new simpleyoutubeapi(process.env['YOUTUBE_API_KEY']));
-_connections.set('database', { promise: mongodb.connect(`mongodb://${process.env['DB_HOST']}`, { useNewUrlParser: true }) });
+_connections.set('database', { promise: mongodb.connect(`mongodb://${process.env['DB_HOST']}/${process.env['DB_NAME']}`, { useNewUrlParser: true }) });
 
 _connections.set('discord', { client: new discordjs.Client() });
 _connections.get('discord').promise = _connections.get('discord').client.login(process.env['DISCORD_TOKEN']);
@@ -35,6 +34,7 @@ database.catch(() => {
 
 database.then(client => {
 	_connections.get('database').client = client;
+	_connections.get('database').db = client.db();
 	logger.success({ prefix: '1/1', message: 'Database:', suffix: 'Connected.' });
 });
 
@@ -55,9 +55,10 @@ discord.promise.catch(() => {
 
 Promise.all([database, discord.promise])
 .then(() => {
+	require('./lib/cycleDb');
 	logger.complete({ prefix: '1/1', message: 'DJ Stapleton:', suffix: 'Started.'});
 }).catch(error => {
-	logger.fatal({ prefix: '0/1', message: 'DJ Stapleton:', suffix: `${error} failed to start.`});
+	logger.fatal({ prefix: '0/1', message: 'DJ Stapleton:', suffix: `${error} | Failed to start.`});
 });
 
 if (process.env['DEBUG'] == true) {

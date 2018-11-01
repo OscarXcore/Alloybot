@@ -2,24 +2,25 @@
 * DJ Stapleton *
 * help.js      *
 ****************/
+const lang = _langfiles.get('musicbot');
 
 module.exports = function() {
     let metadata = {
-        name: `help`,
-        desc: `Gets more info on any listed command.`,
+        name: "help",
+        desc: lang.description.help,
         /*sub: {
             here: {
-                desc: `Posts the message in the current channel.`,
-                usage: `help here <command> <subcommand>`.prefixed().inlineCode()
+                desc: "Posts the message in the current channel.",
+                usage: "help here <command> <subcommand>".prefixed().inlineCode()
             },
             dm: {
-                desc: `Posts the message in the users' direct messages.`,
-                usage: `help dm <command> <subcommand>`.prefixed().inlineCode()
+                desc: "Posts the message in the users" direct messages.",
+                usage: "help dm <command> <subcommand>".prefixed().inlineCode()
             }
         },*/
-        usage: `help <command>`.prefixed().inlineCode(),
-        example: `help join`.prefixed().inlineCode(),
-        type: `General`,
+        usage: "help <command>".prefixed().inlineCode(),
+        example: "help join".prefixed().inlineCode(),
+        type: lang.type[0],
         disabled: false,
         reason: null
     }
@@ -30,11 +31,11 @@ module.exports = function() {
 }
 
 function main(message) {
-    let embed = connections.get('discord').embed(), metadata;
+    let embed = connections.get("discord").embed(), metadata;
 
     try { metadata = _musicbot.metadata.get(_musicbot.command) } 
     catch (error) { 
-        message.channel.send(`Unable to get info about ${_musicbot.command.inlineCode()}. Check the spelling, otherwise its probably not a command.`);
+        message.channel.send(lang.noInfo.format(_musicbot.command.inlineCode()));
     }
 
     metadata.sub
@@ -42,16 +43,16 @@ function main(message) {
         Object.keys(metadata.sub).forEach(subcommand => {
             _musicbot.split[1] == subcommand
             ? () => {
-                embed.setFooter(`Subcommand Info - ${subcommand}`);
+                embed.setFooter(lang.label.subcommandInfo.format(subcommand));
                 embed.setDescription(metadata.sub[subcommand].desc);
-                embed.addField('Usage', metadata.sub[subcommand].usage);
-                embed.addField('Example', metadata.sub[subcommand].example);
+                embed.addField(lang.label.usage, metadata.sub[subcommand].usage);
+                embed.addField(lang.label.example, metadata.sub[subcommand].example);
                 
                 metadata.sub[sub].disabled == false
-                ? embed.addField('Enabled?', ':white_check_mark:', true)
+                ? embed.addField(lang.label.enabled, lang.symbol.enabled, true)
                 : () => { 
-                    embed.addField('Enabled?', ':negative_squared_cross_mark:', true);
-                    embed.addField('Reason', metadata.sub[subcommand].reason ? metadata.sub[subcommand].reason : 'Because it is.');
+                    embed.addField(lang.label.enabled, lang.symbol.disabled, true);
+                    embed.addField(lang.label.reason, metadata.sub[subcommand].reason ? metadata.sub[subcommand].reason : lang.general.reason);
                 }
                 
                 message.channel.send(embed);
@@ -62,20 +63,20 @@ function main(message) {
         })
     }
     : () => {
-        embed.setFooter(`Command Info - ${metadata.name}`);
+        embed.setFooter(lang.label.commandInfo.format(metadata.name));
         embed.setDescription(metadata.desc);
-        embed.addField('Usage', metadata.usage);
-        embed.addField('Example', metadata.example);
-        embed.addField('Type', metadata.type, true);
+        embed.addField(lang.label.usage, metadata.usage);
+        embed.addField(lang.label.example, metadata.example);
+        embed.addField(lang.label.type, metadata.type, true);
 
         metadata.disabled == false
-        ? embed.addField('Enabled?', ':white_check_mark:', true)
+        ? embed.addField(lang.label.enabled, lang.symbol.enabled, true)
         : () => { 
-            embed.addField('Enabled?', ':negative_squared_cross_mark:', true);
-            embed.addField('Reason', metadata.reason ? metadata.reason : 'Because it is.');
+            embed.addField(lang.label.enabled, lang.symbol.disabled, true);
+            embed.addField(lang.label.reason, metadata.reason ? metadata.reason : lang.general.reason);
         }
 
-        if (metadata.sub) embed.addField('Subcommands', Object.keys(metadata.sub).join(', '));
+        if (metadata.sub) embed.addField(lang.label.subcommand, Object.keys(metadata.sub).join(", "));
 
         message.channel.send(embed);
     }

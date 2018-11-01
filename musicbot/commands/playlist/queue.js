@@ -2,15 +2,15 @@
 * DJ Stapleton *
 * playlist.js  *
 ****************/
+const lang = _langfiles.get('musicbot');
 
 module.exports = function() {
     let metadata = {
-        name: `playlist`,
-        desc: `Lists everything in the playlist for the current server.`,
-        sub: {},
-        usage: 'playlist'.prefixed().inlineCode(),
-        example: 'playlist'.prefixed().inlineCode(),
-        type: `Playlist`,
+        name: "queue",
+        desc: lang.description.queue,
+        usage: "queue".prefixed().inlineCode(),
+        example: "queue".prefixed().inlineCode(),
+        type: lang.type[3],
         disabled: false,
         reason: null
     }
@@ -20,6 +20,6 @@ module.exports = function() {
     _musicbot.groups[metadata.type].push(metadata.name);
 }
 
-function main(messageEvent) {
+function main(message) {
     
 }

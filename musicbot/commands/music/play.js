@@ -2,15 +2,15 @@
 * DJ Stapleton *
 * play.js   *
 ****************/
+const lang = _langfiles.get('musicbot');
 
 module.exports = function() {
     let metadata = {
-        name: `play`,
-        desc: `Starts playing the first song in the queue. If there is a youtube link or search words after the command, it will play what it finds, before the queue.`,
-        sub: {},
-        usage: `play <search words|youtube link>`.prefixed().inlineCode(),
-        example: `play sick boy the chainsmokers`.prefixed().inlineCode(),
-        type: `Music`,
+        name: "play",
+        desc: lang.description.play,
+        usage: "play <search words|youtube link>".prefixed().inlineCode(),
+        example: "play sick boy the chainsmokers".prefixed().inlineCode(),
+        type: lang.type[1],
         disabled: false,
         reason: null
     }
@@ -20,6 +20,6 @@ module.exports = function() {
     _musicbot.groups[metadata.type].push(metadata.name);
 }
 
-function main(messageEvent) {
+function main(message) {
     
 }
