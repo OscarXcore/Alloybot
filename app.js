@@ -1,18 +1,36 @@
+/******************
+ * Initialization *
+ ******************/
+require('./lib/format');
+
+const EventEmitter = require('events').EventEmitter;
+const simpleyoutubeapi = require('simple-youtube-api');
+const mongodb = require('mongodb').MongoClient;
+const discordjs = require('discord.js');
+const dotenv = require('dotenv').config({
+  path: './private.env'
+});
+
 global._connections = new Map();
 global._options = new Map();
 global._symbols = /(\W)/g;
-global._langfiles = new Map();
+global._langfiles = new Map([['dj-stapleton', require('./lib/lang.json')]]);
 global._loader = require('./lib/loader');
-
-require('dotenv').config({
-  path: './private.env'
-});
-require('./lib/format');
-require('./lib/logger');
-
-const simpleyoutubeapi = require('simple-youtube-api');
-const discordjs = require('discord.js');
-const mongodb = require('mongodb').MongoClient;
+global._logger = require('./lib/logger');
+global._events = new EventEmitter();
+global._bot = {
+  permissions: new discordjs.Permissions(Number(process.env['DISCORD_PERMISSIONS'])),
+  commands: new Map(),
+  metadata: new Map(),
+  prefix: process.env['CMD_PREFIX'],
+  groups: {
+    General: [],
+    Music: [],
+    Other: [],
+    Playlist: [],
+    Voice: []
+  }
+};
 
 _connections.set('ytapi', new simpleyoutubeapi(process.env['YOUTUBE_API_KEY']));
 _connections.set('database', {
@@ -30,19 +48,19 @@ _connections.get('discord').promise = _connections
 /******************
  * Event Handling *
  ******************/
-let database = _connections.get('database').promise;
-let discord = _connections.get('discord');
+const database = _connections.get('database').promise;
+const discord = _connections.get('discord');
 
-logger.start({ prefix: '0/1', message: 'DJ Stapleton:', suffix: 'Starting.' });
+_logger.start({ prefix: '0/1', message: 'DJ Stapleton:', suffix: 'Starting.' });
 
 database.catch(() => {
-  logger.error({ prefix: '0/1', message: 'Database:', suffix: 'Failed.' });
+  _logger.error({ prefix: '0/1', message: 'Database:', suffix: 'Failed.' });
 });
 
 database.then((client) => {
   _connections.get('database').client = client;
   _connections.get('database').db = client.db();
-  logger.success({
+  _logger.success({
     prefix: '1/1',
     message: 'Database:',
     suffix: 'Connected.'
@@ -50,12 +68,12 @@ database.then((client) => {
 });
 
 discord.promise.then(() => {
-  logger.success({
+  _logger.success({
     prefix: '1/1',
     message: 'Discord:',
     suffix: 'Connected.'
   });
-  logger.info({
+  _logger.info({
     prefix: '1/1',
     message: 'Server Count:',
     suffix: discord.client.guilds.size.toString()
@@ -72,20 +90,21 @@ discord.promise.then(() => {
 });
 
 discord.promise.catch(() => {
-  logger.error({ prefix: '0/1', message: 'Discord:', suffix: 'Failed.' });
+  _logger.error({ prefix: '0/1', message: 'Discord:', suffix: 'Failed.' });
 });
 
 Promise.all([database, discord.promise])
   .then(() => {
-    require('./lib/cycleDb');
-    logger.complete({
+    _bot.createCollection = require('./lib/cycleDb');
+    _loader(require('path').join(__dirname, './commands'));
+    _logger.complete({
       prefix: '1/1',
       message: 'DJ Stapleton:',
       suffix: 'Started.'
     });
   })
   .catch((error) => {
-    logger.fatal({
+    _logger.fatal({
       prefix: '0/1',
       message: 'DJ Stapleton:',
       suffix: `${error} | Failed to start.`
@@ -94,11 +113,56 @@ Promise.all([database, discord.promise])
 
 if (process.env['DEBUG'] == true) {
   discord.client.on('debug', (debug) => {
-    logger.debug({ prefix: 'Discord', message: debug });
+    _logger.debug({ prefix: 'Discord', message: debug });
   });
+}
+
+/*************
+ * onMessage *
+ *************/
+discord.client.on('message', (message) => {
+  if (message.content.startsWith(_bot.prefix)) onMessage(message);
+});
+
+function onMessage(message) {
+  if (message.author.id == discord.client.user.id) return;
+
+  _bot.split = message.content.split(' ');
+  _bot.command = message.content
+    .split(' ')
+    .shift()
+    .replace(global._symbols, '');
+
+  switch (message.channel.type) {
+    case 'dm':
+      discord.embed.thumbnail = message.recipient.displayAvatarURL;
+      _bot.createCollection(message.channel.type, message.channel.id, message.channel.recipient.id);
+      break;
+    case 'group':
+      _bot.createCollection(message.channel.type, message.channel.id, message.channel.ownerID);
+      discord.embed.thumbnail = message.channel.iconURL;
+      break;
+    case 'text':
+      _bot.createCollection('guild', message.guild.id, message.channel.ownerID);
+      discord.embed.thumbnail = message.guild.iconURL;
+      break;
+    default:
+      return;
+  }
+
+  try {
+    _bot.commands.get(_bot.command)(message);
+  } catch (error) {
+    message.channel.send(
+      lang.noCommand.format(
+        _bot.command.inlineCode(),
+        'cmdlist'.prefixed().inlineCode()
+      )
+    );
+  }
 }
 
 /***********
  * Modules *
  ***********/
-require('./musicbot/index');
+require('./modules/musicbot/index');

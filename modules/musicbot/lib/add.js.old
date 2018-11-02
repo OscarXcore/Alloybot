@@ -68,7 +68,7 @@ function getVideo(message, link) {
         }
 
         queueModel.create(item, (error, item) => {
-            if (error) logger.error("Failed to create document. ${error}");
+            if (error) _logger.error("Failed to create document. ${error}");
         });
     });
 }*/

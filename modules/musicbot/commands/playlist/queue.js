@@ -10,14 +10,14 @@ module.exports = function() {
     desc: lang.description.queue,
     usage: 'queue'.prefixed().inlineCode(),
     example: 'queue'.prefixed().inlineCode(),
-    type: lang.type[3],
+    type: lang.type[1],
     disabled: false,
     reason: null
   };
 
-  _musicbot.commands.set(metadata.name, main);
-  _musicbot.metadata.set(metadata.name, metadata);
-  _musicbot.groups[metadata.type].push(metadata.name);
+  _bot.commands.set(metadata.name, main);
+  _bot.metadata.set(metadata.name, metadata);
+  _bot.groups[metadata.type].push(metadata.name);
 };
 
 function main(message) {}

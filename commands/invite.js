@@ -2,7 +2,7 @@
  * DJ Stapleton      *
  * generateinvite.js *
  *********************/
-const lang = _langfiles.get('musicbot');
+const lang = _langfiles.get('dj-stapleton');
 
 module.exports = function() {
   let metadata = {
@@ -15,15 +15,15 @@ module.exports = function() {
     reason: null //"For the bot creator only."
   };
 
-  _musicbot.commands.set(metadata.name, main);
-  _musicbot.metadata.set(metadata.name, metadata);
-  _musicbot.groups[metadata.type].push(metadata.name);
+  _bot.commands.set(metadata.name, main);
+  _bot.metadata.set(metadata.name, metadata);
+  _bot.groups[metadata.type].push(metadata.name);
 };
 
 function main(message) {
   connections
     .get('discord')
-    .client.generateInvite(_musicbot.permissions)
+    .client.generateInvite(_bot.permissions)
     .then((invite) => {
       message.channel.send('%s'.format(invite));
     })

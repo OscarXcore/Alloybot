@@ -2,7 +2,7 @@
  * DJ Stapleton *
  * help.js      *
  ****************/
-const lang = _langfiles.get('musicbot');
+const lang = _langfiles.get('dj-stapleton');
 
 module.exports = function() {
   let metadata = {
@@ -25,9 +25,9 @@ module.exports = function() {
     reason: null
   };
 
-  _musicbot.commands.set(metadata.name, main);
-  _musicbot.metadata.set(metadata.name, metadata);
-  _musicbot.groups[metadata.type].push(metadata.name);
+  _bot.commands.set(metadata.name, main);
+  _bot.metadata.set(metadata.name, metadata);
+  _bot.groups[metadata.type].push(metadata.name);
 };
 
 function main(message) {
@@ -35,15 +35,15 @@ function main(message) {
     metadata;
 
   try {
-    metadata = _musicbot.metadata.get(_musicbot.command);
+    metadata = _bot.metadata.get(_bot.command);
   } catch (error) {
-    message.channel.send(lang.noInfo.format(_musicbot.command.inlineCode()));
+    message.channel.send(lang.noInfo.format(_bot.command.inlineCode()));
   }
 
   metadata.sub
     ? () => {
         Object.keys(metadata.sub).forEach((subcommand) => {
-          if (_musicbot.split[1] == subcommand) {
+          if (_bot.split[1] == subcommand) {
             embed.setFooter(lang.label.subcommandInfo.format(subcommand));
             embed.setDescription(metadata.sub[subcommand].desc);
             embed.addField(lang.label.usage, metadata.sub[subcommand].usage);

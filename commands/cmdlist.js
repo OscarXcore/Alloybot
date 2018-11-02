@@ -2,7 +2,7 @@
  * DJ Stapleton *
  * cmdlist.js   *
  ****************/
-const lang = _langfiles.get('musicbot');
+const lang = _langfiles.get('dj-stapleton');
 
 module.exports = function() {
   let metadata = {
@@ -15,17 +15,17 @@ module.exports = function() {
     reason: null
   };
 
-  _musicbot.commands.set(metadata.name, main);
-  _musicbot.metadata.set(metadata.name, metadata);
-  _musicbot.groups[metadata.type].push(metadata.name);
+  _bot.commands.set(metadata.name, main);
+  _bot.metadata.set(metadata.name, metadata);
+  _bot.groups[metadata.type].push(metadata.name);
 };
 
 function main(message) {
   let embed = _connections.get('discord').embed();
 
-  Object.keys(_musicbot.groups).forEach((group) => {
-    if (_musicbot.groups[group].length > 0)
-      embed.addField(group, _musicbot.groups[group].join(', '));
+  Object.keys(_bot.groups).forEach((group) => {
+    if (_bot.groups[group].length > 0)
+      embed.addField(group, _bot.groups[group].join(', '));
     else embed.addField(group, lang.label.empty);
   });
 
