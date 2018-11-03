@@ -13,7 +13,7 @@ const dotenv = require('dotenv').config({
 global._connections = new Map();
 global._options = new Map();
 global._symbols = /(\W)/g;
-global._langfiles = new Map([['dj-stapleton', require('./lib/lang.json')]]);
+global._langfiles = new Map([['alloybot', require('./lib/lang.json')]]);
 global._loader = require('./lib/loader');
 global._logger = require('./lib/logger');
 global._events = new EventEmitter();
@@ -51,7 +51,7 @@ _connections.get('discord').promise = _connections
 const database = _connections.get('database').promise;
 const discord = _connections.get('discord');
 
-_logger.start({ prefix: '0/1', message: 'DJ Stapleton:', suffix: 'Starting.' });
+_logger.start({ prefix: '0/1', message: 'Alloybot:', suffix: 'Starting.' });
 
 database.catch(() => {
   _logger.error({ prefix: '0/1', message: 'Database:', suffix: 'Failed.' });
@@ -99,14 +99,14 @@ Promise.all([database, discord.promise])
     _loader(require('path').join(__dirname, './commands'));
     _logger.complete({
       prefix: '1/1',
-      message: 'DJ Stapleton:',
+      message: 'Alloybot:',
       suffix: 'Started.'
     });
   })
   .catch(error => {
     _logger.fatal({
       prefix: '0/1',
-      message: 'DJ Stapleton:',
+      message: 'Alloybot:',
       suffix: `${error} | Failed to start.`
     });
   });
@@ -173,4 +173,4 @@ function onMessage(message) {
 /***********
  * Modules *
  ***********/
-require('./modules/musicbot/index');
+require('./modules/example/index');

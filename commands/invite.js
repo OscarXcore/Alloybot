@@ -1,8 +1,8 @@
 /********************
- * DJ Stapleton      *
+ * Alloybot      *
  * generateinvite.js *
  *********************/
-const lang = _langfiles.get('dj-stapleton');
+const lang = _langfiles.get('alloybot');
 
 module.exports = function() {
   let metadata = {
