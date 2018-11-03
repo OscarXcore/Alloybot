@@ -10,7 +10,7 @@ module.exports = function() {
     desc: lang.description.queue,
     usage: 'queue'.prefixed().inlineCode(),
     example: 'queue'.prefixed().inlineCode(),
-    type: lang.type[1],
+    type: lang.type[0],
     disabled: false,
     reason: null
   };

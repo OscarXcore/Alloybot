@@ -12,7 +12,7 @@ module.exports = function() {
     desc: lang.description.add,
     usage: 'add <search words|youtube link>'.prefixed().inlineCode(),
     example: 'add khalid better'.prefixed().inlineCode(),
-    type: lang.type[1],
+    type: lang.type[0],
     disabled: false,
     reason: null
   };
