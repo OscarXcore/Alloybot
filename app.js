@@ -4,7 +4,6 @@
 require('./lib/format');
 
 const EventEmitter = require('events').EventEmitter;
-const simpleyoutubeapi = require('simple-youtube-api');
 const mongodb = require('mongodb').MongoClient;
 const discordjs = require('discord.js');
 const dotenv = require('dotenv').config({
@@ -19,7 +18,9 @@ global._loader = require('./lib/loader');
 global._logger = require('./lib/logger');
 global._events = new EventEmitter();
 global._bot = {
-  permissions: new discordjs.Permissions(Number(process.env['DISCORD_PERMISSIONS'])),
+  permissions: new discordjs.Permissions(
+    Number(process.env['DISCORD_PERMISSIONS'])
+  ),
   commands: new Map(),
   metadata: new Map(),
   prefix: process.env['CMD_PREFIX'],
@@ -32,7 +33,6 @@ global._bot = {
   }
 };
 
-_connections.set('ytapi', new simpleyoutubeapi(process.env['YOUTUBE_API_KEY']));
 _connections.set('database', {
   promise: mongodb.connect(
     `mongodb://${process.env['DB_HOST']}/${process.env['DB_NAME']}`,
@@ -57,7 +57,7 @@ database.catch(() => {
   _logger.error({ prefix: '0/1', message: 'Database:', suffix: 'Failed.' });
 });
 
-database.then((client) => {
+database.then(client => {
   _connections.get('database').client = client;
   _connections.get('database').db = client.db();
   _logger.success({
@@ -103,7 +103,7 @@ Promise.all([database, discord.promise])
       suffix: 'Started.'
     });
   })
-  .catch((error) => {
+  .catch(error => {
     _logger.fatal({
       prefix: '0/1',
       message: 'DJ Stapleton:',
@@ -112,7 +112,7 @@ Promise.all([database, discord.promise])
   });
 
 if (process.env['DEBUG'] == true) {
-  discord.client.on('debug', (debug) => {
+  discord.client.on('debug', debug => {
     _logger.debug({ prefix: 'Discord', message: debug });
   });
 }
@@ -120,7 +120,7 @@ if (process.env['DEBUG'] == true) {
 /*************
  * onMessage *
  *************/
-discord.client.on('message', (message) => {
+discord.client.on('message', message => {
   if (message.content.startsWith(_bot.prefix)) onMessage(message);
 });
 
@@ -136,10 +136,18 @@ function onMessage(message) {
   switch (message.channel.type) {
     case 'dm':
       discord.embed.thumbnail = message.recipient.displayAvatarURL;
-      _bot.createCollection(message.channel.type, message.channel.id, message.channel.recipient.id);
+      _bot.createCollection(
+        message.channel.type,
+        message.channel.id,
+        message.channel.recipient.id
+      );
       break;
     case 'group':
-      _bot.createCollection(message.channel.type, message.channel.id, message.channel.ownerID);
+      _bot.createCollection(
+        message.channel.type,
+        message.channel.id,
+        message.channel.ownerID
+      );
       discord.embed.thumbnail = message.channel.iconURL;
       break;
     case 'text':
